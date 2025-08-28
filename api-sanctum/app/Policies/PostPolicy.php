@@ -8,6 +8,11 @@ use Illuminate\Auth\Access\Response;
 
 class PostPolicy
 {
+    public function create(User $user, Post $post): bool
+    {
+        return $post->user_id === $user->id;
+    }
+
     public function update(User $user, Post $post): bool
     {
         return $post->user_id === $user->id;

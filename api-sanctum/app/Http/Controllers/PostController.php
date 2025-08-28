@@ -10,7 +10,6 @@ class PostController extends Controller
     // public, paginated
     public function index(Request $request)
     {
-        // Support optional auth on this public route by checking Sanctum guard explicitly
         $authenticatedUser = $request->user() ?: auth('sanctum')->user();
         $userId = $authenticatedUser->id ?? null;
 
@@ -33,15 +32,26 @@ class PostController extends Controller
         return $posts;
     }
 
-    // protected
+    // protected + policy
     public function store(Request $request)
     {
+        $user = $request->user();
+        if (!$user) {
+            abort(401, 'Unauthorized');
+        }
+
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string'
         ]);
 
-        $post = $request->user()->posts()->create($data);
+        // Create a new Post instance for authorization check
+        $post = new Post($data);
+        $post->user_id = $user->id;
+
+        $this->authorize('create', $post);
+
+        $post = $user->posts()->create($data);
         return $post->load('user:id,name');
     }
 

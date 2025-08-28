@@ -13,12 +13,19 @@ class CommentController extends Controller
     {
         $request->validate(['content' => 'required|string']);
 
+        $comment = new Comment([
+            'content' => $request->content,
+            'user_id' => $request->user()->id,
+        ]);
+
+        // Authorize the creation of the comment
+        $this->authorize('create', $comment);
+
         $comment = $post->comments()->create([
             'content' => $request->content,
             'user_id' => $request->user()->id,
         ]);
 
-        // Return the comment with user info for immediate UI rendering
         return response()->json($comment->load('user:id,name'), 201);
     }
 

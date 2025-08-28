@@ -27,9 +27,9 @@ class CommentPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, Comment $comment): bool
     {
-        return false;
+        return $user->id === $comment->user_id;
     }
 
     /**
